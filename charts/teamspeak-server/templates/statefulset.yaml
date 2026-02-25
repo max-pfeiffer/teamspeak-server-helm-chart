@@ -60,7 +60,7 @@ spec:
             - name: TSSERVER_QUERY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "teamspeak-server.fullname" . }}
+                  name: {{ .Values.config.queryAdminPasswordExistingSecret | default (include "teamspeak-server.fullname" .) }}
                   key: password
           ports:
             - name: default-port
