@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "teamspeak-server.fullname" . }}
+  labels:
+    {{- include "teamspeak-server.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "teamspeak-server.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "teamspeak-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "teamspeak-server.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TSSERVER_LICENSE_ACCEPTED
+              value: "accept"
+            - name: TSSERVER_VOICE_IP
+              value: "0.0.0.0"
+            - name: TSSERVER_DEFAULT_PORT
+              value: "{{ .Values.config.defaultPort }}"
+            - name: TSSERVER_FILE_TRANSFER_PORT
+              value: "{{ .Values.config.fileTransferPort }}"
+            - name: TSSERVER_FILE_TRANSFER_IP
+              value: "0.0.0.0"
+            - name: TSSERVER_QUERY_HTTP_ENABLED
+              value: "{{ .Values.config.queryHttpEnabled}}"
+            - name: TSSERVER_QUERY_HTTP_PORT
+              value: "{{ .Values.config.queryHttpPort}}"
+            - name: TSSERVER_QUERY_SSH_ENABLED
+              value: "{{ .Values.config.querySshEnabled}}"
+            - name: TSSERVER_QUERY_SSH_PORT
+              value: "{{ .Values.config.querySshPort}}"
+            - name: TSSERVER_QUERY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "teamspeak-server.fullname" . }}
+                  key: password
+          ports:
+            - name: default-port
+              containerPort: {{ .Values.config.defaultPort }}
+              protocol: UDP
+            - name: ft-port
+              containerPort: {{ .Values.config.fileTransferPort }}
+              protocol: TCP
+            - name: query-http-port
+              containerPort: {{ .Values.config.queryHttpPort }}
+              protocol: TCP
+            - name: query-ssh-port
+              containerPort: {{ .Values.config.querySshPort }}
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: query-http-port
+          readinessProbe:
+            tcpSocket:
+              port: query-http-port
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: "/var/tsserver"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: {{ .Values.config.volumeStorageSize }}

@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "teamspeak-server.fullname" . }}
+  labels:
+    {{- include "teamspeak-server.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.config.defaultPort }}
+      targetPort: default-port
+      protocol: UDP
+      name: default-port
+    - port: {{ .Values.config.fileTransferPort }}
+      targetPort: ft-port
+      protocol: TCP
+      name: ft-port
+    - port: {{ .Values.config.queryHttpPort }}
+      targetPort: query-http-port
+      protocol: TCP
+      name: query-http-port
+    - port: {{ .Values.config.querySshPort }}
+      targetPort: query-ssh-port
+      protocol: TCP
+      name: query-ssh-port
+  selector:
+    {{- include "teamspeak-server.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "teamspeak-server.fullname" . }}-0
+  labels:
+    {{- include "teamspeak-server.labels" . | nindent 4 }}
+    {{- with .Values.service.metadata.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.metadata.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.config.defaultPort }}
+      targetPort: default-port
+      protocol: UDP
+      name: default-port
+    - port: {{ .Values.config.fileTransferPort }}
+      targetPort: ft-port
+      protocol: TCP
+      name: ft-port
+    - port: {{ .Values.config.queryHttpPort }}
+      targetPort: query-http-port
+      protocol: TCP
+      name: query-http-port
+    - port: {{ .Values.config.querySshPort }}
+      targetPort: query-ssh-port
+      protocol: TCP
+      name: query-ssh-port
+  selector:
+    statefulset.kubernetes.io/pod-name: {{ include "teamspeak-server.fullname" . }}-0
