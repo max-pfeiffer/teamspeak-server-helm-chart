@@ -117,14 +117,22 @@ affinity: {}
 
 # See: https://github.com/teamspeak/teamspeak6-server/blob/main/CONFIG.md
 config:
+  # Sets the default UDP voice port for the first virtual server created.
   defaultPort: 9987
+  # The TCP port used for file transfers.
   fileTransferPort: 30033
+  # Enables the HTTP query interface.
   queryHttpEnabled: true
+  # The port for the HTTP query interface.
   queryHttpPort: 10080
+  # Enables the SSH query interface.
   querySshEnabled: true
+  # The port for the SSH query interface.
   querySshPort: 10022
+  # Sets a password for the serveradmin query account, overriding the database.
   queryAdminPassword: supersecret
   # Name of the existing secret to use for the queryAdminPassword.
   # If this is set, queryAdminPassword is ignored.
   queryAdminPasswordExistingSecret: ""
+  # Size of the attached Volume where SQLite database is stored
   volumeStorageSize: 1Gi
