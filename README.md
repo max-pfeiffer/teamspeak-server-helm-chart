@@ -14,6 +14,10 @@ $ helm repo add teamspeak-server https://max-pfeiffer.github.io/teamspeak-server
 $ helm install teamspeak-server teamspeak-server/teamspeak-server --values your_values.yaml --namespace yournamespace 
 ```
 
+## HTTP QUERY API
+You can expose the HTTP Query API with a HTTPRoute or an Ingress using this Helm chart.
+The API documentation is then available on http://yourdomain.org/swagger
+
 ## Setup Admin Access
 SSH into the server using the non-standard port `10022` and the IP-address or domain you configured for it.
 Use the `queryAdminPassword` for logging in:
@@ -57,3 +61,4 @@ Command Overview:
 * [Official Teamspeak Website](https://www.teamspeak.com/)
 * [Teamspeak 6 Server Docker image](https://hub.docker.com/r/teamspeaksystems/teamspeak6-server)
 * [Teamspeak 6 Server configuration documentation](https://github.com/teamspeak/teamspeak6-server/blob/main/CONFIG.md)
+* [Teamspeak 6 Server Community Forum](https://community.teamspeak.com/c/teamspeak-6-server/45 )
